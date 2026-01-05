@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from .attention import MultiHeadAttention
 
-class TransformerEncoder(nn.Module):
+class TransformerBase(nn.Module):
     def __init__(self, embedding_num: int, embedding_dim: int, attention_dim: int, num_heads: int, out_dim: int, padding_index: int = None, device= "cuda"):
         super().__init__()
 

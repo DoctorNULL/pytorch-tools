@@ -1,3 +1,3 @@
 from .embedding import PositionalEmbedding, SinusoidalEmbedding, RotaryEmbedding
 from .attention import MultiHeadAttention
-from .base import TransformerEncoder
+from .base import TransformerBase
