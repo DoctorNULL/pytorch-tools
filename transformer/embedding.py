@@ -25,17 +25,18 @@ class PositionalEmbedding(nn.Module):
 
 
 class SinusoidalEmbedding(nn.Module):
-    def __init__(self, embedding_dim: int):
+    def __init__(self, embedding_dim: int, device="cpu"):
         super().__init__()
 
         self.embedding_dim = embedding_dim
+        self.device = device
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # (B, 1)
 
         seq_len = x.max().item()
 
-        row = torch.arange(1, seq_len + 1)
+        row = torch.arange(1, seq_len + 1, device=self.device)
         y = row.unsqueeze(0) < x + 1
         y = (row * y).unsqueeze(2).repeat(1, 1, self.embedding_dim)
 
@@ -48,18 +49,22 @@ class SinusoidalEmbedding(nn.Module):
         return y # (B, MaxSeq, Embedding)
 
 
+    def to(self, device: str):
+        self.device = device
+
 class RotaryEmbedding(nn.Module):
-    def __init__(self, embedding_dim):
+    def __init__(self, embedding_dim: int, device="cpu"):
         super().__init__()
 
         self.embedding_dim = embedding_dim
-        self.inv_freq = 1 / (10000 ** (torch.arange(0, embedding_dim).float() / embedding_dim))
+        self.inv_freq = 1 / (10000 ** (torch.arange(0, embedding_dim).float() / embedding_dim)).to(device)
+        self.device = device
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         #(B, 1)
         seq_len = x.max().item()
 
-        row = torch.arange(1, seq_len + 1)
+        row = torch.arange(1, seq_len + 1, device=self.device)
         y = row.unsqueeze(0) < x + 1
         y = (row * y).unsqueeze(2).repeat(1, 1, self.embedding_dim)
 
@@ -69,3 +74,7 @@ class RotaryEmbedding(nn.Module):
         y[:, :, 1] = y[:, :, 1].cos()
 
         return y # (B, MaxSeq, Embedding)
+
+    def to(self, device: str):
+        self.device = device
+        self.inv_freq = self.inv_freq.to(device)
