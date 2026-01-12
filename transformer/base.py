@@ -29,8 +29,14 @@ class TransformerBase(nn.Module):
 
         emb = self.embedding(x) # Capture embeddings of input sequence
         # (B, SeqLen, Embedding)
+        
+        return self.forward_pass_embedding(emb, mask)
+        
 
-        y = self.norm1(emb) # Pre norm
+    def forward_pass_embedding(self, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+        # (B, SeqLen, Embedding)
+
+        y = self.norm1(x) # Pre norm
 
         y = self.attention(y, mask) # Capture attentions
         # (B, SeqLen, Attention * Head)
@@ -38,7 +44,7 @@ class TransformerBase(nn.Module):
         y = self.att_proj(y)
         # (B, SeqLen, Embedding)
 
-        res1 = y + emb # Residual Connection
+        res1 = y + x # Residual Connection
 
         y = self.norm2(res1)
         # (B, SeqLen, Embedding)
@@ -79,11 +85,17 @@ class TransformerWithMoE(nn.Module):
         self.norm2 = nn.LayerNorm(embedding_dim, device= device)
 
         self.top_k = active_experts_num
-
+    
     def forward(self, x: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
         # (B, SeqLen)
 
         emb = self.embedding(x) # Capture embeddings of input sequence
+        # (B, SeqLen, Embedding)
+        
+        return self.forward_pass_embedding(emb, mask)
+        
+
+    def forward_pass_embedding(self, emb: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
         # (B, SeqLen, Embedding)
 
         y = self.norm1(emb) # Pre norm
