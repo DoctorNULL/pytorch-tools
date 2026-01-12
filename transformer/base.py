@@ -38,15 +38,15 @@ class TransformerBase(nn.Module):
         y = self.att_proj(y)
         # (B, SeqLen, Embedding)
 
-        y = y + emb # Residual Connection
+        res1 = y + emb # Residual Connection
 
-        y = self.norm2(y)
+        y = self.norm2(res1)
         # (B, SeqLen, Embedding)
 
         y = self.out(y)
         # (B, SeqLen, Embedding)
 
-        return y # (B, SeqLen, Embedding)
+        return y + res1 # (B, SeqLen, Embedding)
 
 
 class TransformerWithMoE(nn.Module):
